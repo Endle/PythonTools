@@ -29,7 +29,7 @@ def move_file(path, file):
     shutil.move(file, src)
     _eat(src, dst)
     shutil.move(dst, file)
-    shutil.remove(src)
+    os.remove(src)
 
 def walk_path(path):
     for name in os.listdir(path):
