@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 #-*- coding: utf-8 -*-
 
 ORI_FILE = "_origin"
