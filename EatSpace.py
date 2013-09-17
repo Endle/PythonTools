@@ -7,8 +7,7 @@ ENCODE = "utf-8"
 
 WORKING_PATH = "" #Need Initialize
 
-import os
-import shutil
+import os, shutil, sys
 
 def _eat(src, dst):
     '''Will read src and write to dst
@@ -43,5 +42,11 @@ def walk_path(path):
             walk_path(name)
 
 if __name__ == '__main__':
-    WORKING_PATH = os.path.abspath('.')
-    walk_path(WORKING_PATH)
+    if len(sys.argv) < 2:
+       work_list = ('.',)
+    else:
+        work_list = tuple(sys.argv[1:])
+
+    for work in work_list:
+        WORKING_PATH = os.path.abspath(work)
+        walk_path(WORKING_PATH)
