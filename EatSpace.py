@@ -1,35 +1,32 @@
 #!/usr/bin/python3
 #-*- coding: utf-8 -*-
 
-ORI_FILE = "_origin"
-OPT_FILE = "_result"
 ENCODE = "utf-8"
 
 WORKING_PATH = "" #Need Initialize
 
 import os, shutil, sys
 
-def _eat(src, dst):
-    '''Will read src and write to dst
-    Then close these file.'''
-    fin = open(src, 'r', encoding=ENCODE)
-    fout = open(dst, 'w', encoding=ENCODE)
-    for line in fin:
-        print(line.rstrip(), file=fout)
+def _eat(lines):
+    '''Will read a list of lines,
+    Then return a list of modified lines.
+    '''
+    return [line.rstrip()  for line in lines]
 
-    fin.close()
-    fout.close()
-
-def move_file(path, file):
+def handle_file(path, file):
     '''Move $file to ORI_FILE'''
     print(file)
-    src = os.path.join(path, ORI_FILE)
-    dst = os.path.join(path, OPT_FILE)
+    src = os.path.join(path, file)
 
-    shutil.move(file, src)
-    _eat(src, dst)
-    shutil.move(dst, file)
-    os.remove(src)
+    fin = open(src, 'r', encoding=ENCODE)
+    lines = fin.readlines()
+    fin.close()
+
+    lines = _eat(lines)
+    fout = open(src, 'w', encoding=ENCODE)
+    for line in lines:
+        print(line, file=fout)
+    fout.close()
 
 def walk_path(path):
     for name in os.listdir(path):
@@ -37,7 +34,7 @@ def walk_path(path):
             continue    #Ignore
         name = os.path.join(path, name)
         if os.path.isfile(name):
-            move_file(path, name)
+            handle_file(path, name)
         elif os.path.isdir(name):
             walk_path(name)
 
