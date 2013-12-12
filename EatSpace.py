@@ -15,8 +15,11 @@ def _eat(lines):
 
 def handle_file(path, file):
     '''Move $file to ORI_FILE'''
-    print(file)
-    src = os.path.join(path, file)
+    if file:
+        print(file)
+        src = os.path.join(path, file)
+    else:
+        src = path
 
     fin = open(src, 'r', encoding=ENCODE)
     lines = fin.readlines()
@@ -29,6 +32,12 @@ def handle_file(path, file):
     fout.close()
 
 def walk_path(path):
+    print ('Path is ', path)
+    if os.path.isfile(path):
+        print ('Handle once')
+        handle_file(path, None)
+        sys.exit()  # a little ugly
+
     for name in os.listdir(path):
         if name[0] == '.':
             continue    #Ignore
