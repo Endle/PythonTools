@@ -8,7 +8,7 @@ def get_input():
     ret['n'] = n
 
     for i in range(n):
-        print(str(i)+":  ", end="")
+        print(str(i+1)+":  ", end="")
         x = float(input())
         ret[i] = x
     
