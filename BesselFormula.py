@@ -1,3 +1,4 @@
+#!/usr/bin/python3
 #Use python3!
 
 def get_input():
