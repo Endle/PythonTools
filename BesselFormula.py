@@ -9,7 +9,7 @@ def get_input():
 
     for i in range(n):
         print(str(i)+":  ", end="")
-        x = int(input())
+        x = float(input())
         ret[i] = x
     
     return ret
