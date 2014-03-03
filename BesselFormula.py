@@ -15,7 +15,15 @@ def get_input():
     
 
 def compute(data):
-    pass
+    n = data['n']
+    aver = sum([data[i] for i in range(n)]) / n
+    print ("average = " + str(aver))
+
+    a = sum([ (data[i]-aver) **2 for i in range(n)])
+    b = n - 1
+    import math
+    return math.sqrt(a / b)
+
 
 
 data = get_input()
