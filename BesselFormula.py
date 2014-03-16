@@ -1,5 +1,4 @@
 #!/usr/bin/python3
-#Use python3!
 
 def get_input():
     ret = dict()
@@ -11,9 +10,9 @@ def get_input():
         print(str(i+1)+":  ", end="")
         x = float(input())
         ret[i] = x
-    
+
     return ret
-    
+
 
 def compute(data):
     n = data['n']
@@ -24,8 +23,6 @@ def compute(data):
     b = n - 1
     import math
     return math.sqrt(a / b)
-
-
 
 data = get_input()
 S = compute(data)
