@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-#逐差法计算平均距离
+#逐差法计算平均差
 
 def get_input():
     ret = dict()

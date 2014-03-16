@@ -1,4 +1,5 @@
 #!/usr/bin/python3
+#贝赛尔公式
 
 def get_input():
     ret = dict()
