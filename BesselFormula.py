@@ -5,7 +5,6 @@ def get_input():
     ret = dict()
     print ("N = ?", end="     ")
     n = int(input())
-    ret['n'] = n
 
     for i in range(n):
         print(str(i+1)+":  ", end="")
@@ -16,15 +15,18 @@ def get_input():
 
 
 def compute(data):
-    n = data['n']
+    n = len(data)
     aver = sum([data[i] for i in range(n)]) / n
     print ("average = " + str(aver))
 
     a = sum([ (data[i]-aver) **2 for i in range(n)])
     b = n - 1
     import math
+    if b == 0:
+        return None
     return math.sqrt(a / b)
 
-data = get_input()
-S = compute(data)
-print ("S = " + str(S))
+if __name__ == '__main__':
+    data = get_input()
+    S = compute(data)
+    print ("S = " + str(S))
