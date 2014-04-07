@@ -13,21 +13,8 @@ def t95sn(n):
         return 0
 
 def get_input():
-    ret = dict()
-    print ("N = ?", end="     ")
-    n = int(input())
-    #ret['n'] = n
-
-    if n % 2 == 1:
-        raise TypeError("N should be even")
-
-    for i in range(n):
-        print(str(i+1)+":  ", end="")
-        x = float(input())
-        ret[i] = x
-
-    return ret
-
+    import RotationalInertia
+    return RotationalInertia.get_input()
 
 def default_callback(a, b, ia, ib):
     return (b - a) / (ib - ia)
@@ -44,10 +31,5 @@ def compute(data, callback=default_callback):
 
 if __name__ == '__main__':
     data = get_input()
-    result = compute(data,angular_acceleration)
+    result = compute(data)
     print(result)
-    import BesselFormula
-    S = BesselFormula.compute(result)
-    print("S = ", S)
-    da = S * t95sn(len(result))
-    print("DeltaA = ", da)

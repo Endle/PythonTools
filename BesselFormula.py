@@ -2,17 +2,8 @@
 #贝赛尔公式
 
 def get_input():
-    ret = dict()
-    print ("N = ?", end="     ")
-    n = int(input())
-
-    for i in range(n):
-        print(str(i+1)+":  ", end="")
-        x = float(input())
-        ret[i] = x
-
-    return ret
-
+    import RotationalInertia
+    return RotationalInertia.get_input()
 
 def compute(data):
     n = len(data)
