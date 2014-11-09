@@ -37,6 +37,11 @@ def draw(points, x_range=None, y_range=None, xlabel=None, ylabel=None):
         x_range = get_range(x_list)
     if not y_range:
         y_range = get_range(y_list)
+    if not xlabel:
+        xlabel = ""
+    if not ylabel:
+        ylabel = ""
+
     matplotlib.pyplot.xlim(x_range[0], x_range[1])
     matplotlib.pyplot.ylim(y_range[0], y_range[1])
 
@@ -55,4 +60,4 @@ def draw(points, x_range=None, y_range=None, xlabel=None, ylabel=None):
 
 if __name__ == '__main__':
     data = get_data()
-    draw(data, xlabel="c mg/mL", ylabel="A540")
+    draw(data)
