@@ -17,14 +17,29 @@ def linear_fit(x_list, y_list):
     print(line)
     return line
 
-#FIXME: range & label
+#FIXME: label
 def draw(points, x_range=None, y_range=None, xlabel=None, ylabel=None):
     import matplotlib.pyplot
     x_list = [p[0] for p in points]
     y_list = [p[1] for p in points]
     matplotlib.pyplot.scatter(x_list, y_list)
-    matplotlib.pyplot.xlim(0, 2.5)
-    matplotlib.pyplot.ylim(0, 0.6)
+
+    def get_range(l0):
+        l = sorted(l0)
+        diff = l[-1] - l[0]
+        va = max(0, l[0] - diff / 10)
+        vb = l[-1] + diff/10
+        print(l)
+        print(va, vb)
+        return (va, vb)
+
+    if not x_range:
+        x_range = get_range(x_list)
+    if not y_range:
+        y_range = get_range(y_list)
+    matplotlib.pyplot.xlim(x_range[0], x_range[1])
+    matplotlib.pyplot.ylim(y_range[0], y_range[1])
+
     matplotlib.pyplot.xlabel(xlabel)
     matplotlib.pyplot.ylabel(ylabel)
 
