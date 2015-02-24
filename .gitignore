@@ -1,3 +1,4 @@
 *.swp
 *.txt
+__*.py
 __pycache__
