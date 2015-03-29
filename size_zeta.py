@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import basic_tools
 from collections import namedtuple
+from momap import momap
 
 # ValueGroup 对应一个样品测量三次后得到的数值
 ValueGroup = namedtuple("ValueGroup", ["average", "data_range"])
@@ -18,21 +19,9 @@ class IndexOfSheet():
     Size = 5
     Zeta = 8
 
-def split_by_name(data, wrapper=None):
-    ''' 返回一个 MultiMap
-    考虑把这部分的轮子拆分出去
-    '''
-    result = dict()
-    for d in data:
-        if d[0] not in result.keys():
-            result[d[0]] = list()
-        elem = d[1:]
-        if len(elem) == 1:
-            elem = elem[0]
-        if wrapper:
-            elem = wrapper(elem)
-        result[d[0]].append(elem)
-    return result
+def get_ith(p):
+    return lambda d: float( d.split(':')[p] )
+
 
 def get_data_point(l):
     '''Get a list/tuple of strings
@@ -61,6 +50,15 @@ def load_data(filename="lip.csv"):
         return ([l[IndexOfSheet.Name].split(' ')[0], l[IndexOfSheet.Zeta]]\
                 for l in csvdata if l[IndexOfSheet.Type] == 'Zeta')
 
+    def split_by_name(data, wrapper=None):
+        result = momap()
+        for d in data:
+            elem = d[1:]
+            if wrapper:
+                elem = wrapper(elem)
+            result.extend(d[0], elem)
+        return result
+
     def arrange_data(data):
         '''Expects a dict
         {sample_name : [data1, data2, data3]}
@@ -73,6 +71,7 @@ def load_data(filename="lip.csv"):
         group = split_by_name(data)
         result = list()
         for k,v in group.items():
+
             assert type(k) is str
             assert len(v) == 3
             assert type(v[0]) == type(v[1]) == type(v[2]) == str
@@ -127,17 +126,9 @@ def plotly_print(data, title="", x_axis="", y_axis=""):
 
     DataList = []
 
-    def get_peptide(d):
-        '''Hack Function
-        '''
-        return float( d.split(':')[1] )
-    def get_liposome(d):
-        '''Hack Function
-        '''
-        return float( d.split(':')[2] )
 
     for k, v in data.items():
-        line = get_scatter(v, fetchx = get_liposome, line_name=k+"=1:4:x:14.2")
+        line = get_scatter(v, fetchx=get_ith(3), line_name=k)
         DataList.append(line)
 
     layout = Layout(
@@ -152,17 +143,32 @@ def plotly_print(data, title="", x_axis="", y_axis=""):
     unique_url = py.plot(fig, filename = 'temp')
 
 def main():
+    def split_by_peptide(data_list, wrapper=None):
+        result = momap()
+        for d in data_list:
+            key = d.ingredient + "=" + ":".join(d.ratio.split(":")[:3]) + ":x"
+            elem = d[1:]
+            if wrapper:
+                elem = wrapper(elem)
+            result.add(key, elem)
+        return result
     (size, zeta) = load_data()
-    size = split_by_name(size, wrapper=SingleRatio._make)
-    zeta = split_by_name(zeta)
+    size = split_by_peptide(size, wrapper=SingleRatio._make)
+    zeta = split_by_peptide(zeta, wrapper=SingleRatio._make)
 # After that, size is a (multi)dict
 # size[ingredient] = [SingleRatio]
+
     plotly_print(size,
-            title="粒径与脂质含量关系",
-            x_axis="脂质与DNA质量比",
+            title="粒径与透明质酸含量的关系",
+            x_axis="透明质酸与DNA质量比",
             y_axis="Z-Ave (d.nm)"
             )
 
+    #plotly_print(zeta,
+            #title="电势与透明质酸含量的关系",
+            #x_axis="透明质酸与DNA质量比",
+            #y_axis="ZP (mV)"
+            #)
 
 if __name__ == '__main__':
     main()
