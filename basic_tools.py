@@ -43,3 +43,10 @@ def longest_common_prefix(strings):
 def get_range(li):
     return (min(li), max(li))
 
+import os
+HOME_PATH = os.path.expanduser('~/')
+def getOpenFileName(title:str="Open File", directory:str=HOME_PATH, filter_str:str="", parent=None):
+    '''调用者负责初始化 QApplication '''
+    import PySide.QtGui
+    dialog = PySide.QtGui.QFileDialog()
+    return dialog.getOpenFileName(dialog, title, directory, filter_str)[0]
