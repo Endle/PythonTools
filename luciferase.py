@@ -45,43 +45,6 @@ def get_cell_name() -> str:
     dialog = PySide.QtGui.QInputDialog()
     return dialog.getText(dialog, "", "Cell name: ")[0]
 
-def choose_protein_data(grid:numpy.matrix) -> list:
-    print(sys._getframe().f_code.co_name)
-    data = []
-    class MyWorkerThread(PySide.QtCore.QThread):
-        message = PySide.QtCore.Signal(str)
-
-        def __init__(self, parent=None):
-            super(MyWorkerThread, self).__init__(parent)
-
-        def run(self):
-            import time
-            for i in range(5):
-                self.message.emit("invoked")
-                data.append("emitted")
-                #print("emitted")
-                time.sleep(0.2)
-            return
-            size = grid.shape
-            twid = PySide.QtGui.QTableWidget(size[0], size[1], parent=_MAIN_WINDOW)
-            for row in range(size[0]):
-                for col in range(size[1]):
-                    value = grid.item(row, col)
-                    item = PySide.QtGui.QTableWidgetItem(value)
-                    twid.setItem(row, col, item)
-
-            twid.setWindowTitle('Simple')
-            twid.resize(800, 600)
-            twid.show()
-
-    worker = MyWorkerThread()
-    worker.start()
-    worker.wait()
-    print(data)
-    print(worker.isFinished())
-    print("finished: " + sys._getframe().f_code.co_name)
-    return []
-
 
 def main():
 # Create a Qt application
@@ -113,9 +76,26 @@ def main():
     #cell = get_cell_name()
     cell = "H1299"
 
-    cell_data = choose_protein_data(protein)
-    #print(cell_data)
+# FIXME: 把获取蛋白质信息的内容移出主函数
+# http://segmentfault.com/q/1010000003028975
+    #cell_data = choose_protein_data(protein)
+    grid = protein
+    size = grid.shape
+    twid = PySide.QtGui.QTableWidget(size[0], size[1])
+# 为了设置宽度方便
+    for col in range(size[1]):
+        twid.setColumnWidth(col, 80)
+        for row in range(size[0]):
+            value = grid.item(row, col)
+            print(value)
+            item = PySide.QtGui.QTableWidgetItem(str(value))
+            twid.setItem(row, col, item)
+    twid.resize(1020, 400)
+    twid.setEditTriggers(PySide.QtGui.QAbstractItemView.NoEditTriggers)
+    twid.show()
 
+
+    sys.exit(app.exec_())
 
 
 if __name__ == '__main__':
