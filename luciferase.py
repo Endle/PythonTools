@@ -19,6 +19,24 @@ def handle_xls(file_path:str) -> numpy.matrix :
     assert ret.shape == (8, 12)
     return ret
 
+def _standart_curve(a:float=10, b:float=100):
+    return lambda x : a * x + b
+
+def funm(dat:numpy.matrix, f) -> numpy.matrix:
+    '''Dirty copycat for scipy.linalg.funm'''
+    ret = dat.copy()
+    for x in numpy.nditer(ret, op_flags=['readwrite']):
+        x[...] = f(x)
+
+    return ret
+
+
+def absorb_to_protein(absorb:numpy.matrix) -> numpy.matrix:
+    f = _standart_curve()
+    ret = funm(absorb, f)
+    return ret
+
+
 
 
 def main():
@@ -44,9 +62,10 @@ def main():
             filter_str="Excel files (*.xls)")
     '''
     path = "/home/lizhenbo/文档/第十期大创(2014)/20150708 H1299 NIH3T3.xls"
-    print(path)
     absorb = handle_xls(path)
-    print(absorb)
+
+    protein = absorb_to_protein(absorb)
+    print(protein)
 
     sys.exit()
 
