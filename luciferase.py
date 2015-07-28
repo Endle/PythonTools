@@ -5,6 +5,7 @@ import sys, os
 import numpy
 #from PySide.QtGui import *
 import PySide.QtGui
+import PySide.QtCore
 
 _MAIN_WINDOW = None
 
@@ -45,18 +46,40 @@ def get_cell_name() -> str:
     return dialog.getText(dialog, "", "Cell name: ")[0]
 
 def choose_protein_data(grid:numpy.matrix) -> list:
-    import PySide.QtGui
-    size = grid.shape
-    twid = PySide.QtGui.QTableWidget(size[0], size[1])
-    for row in range(size[0]):
-        for col in range(size[1]):
-            value = grid.item(row, col)
-            item = PySide.QtGui.QTableWidgetItem(value)
-            twid.setItem(row, col, item)
+    print(sys._getframe().f_code.co_name)
+    data = []
+    class MyWorkerThread(PySide.QtCore.QThread):
+        message = PySide.QtCore.Signal(str)
 
-    twid.setWindowTitle('Simple')
-    twid.resize(800, 600)
-    twid.show()
+        def __init__(self, parent=None):
+            super(MyWorkerThread, self).__init__(parent)
+
+        def run(self):
+            import time
+            for i in range(5):
+                self.message.emit("invoked")
+                data.append("emitted")
+                #print("emitted")
+                time.sleep(0.2)
+            return
+            size = grid.shape
+            twid = PySide.QtGui.QTableWidget(size[0], size[1], parent=_MAIN_WINDOW)
+            for row in range(size[0]):
+                for col in range(size[1]):
+                    value = grid.item(row, col)
+                    item = PySide.QtGui.QTableWidgetItem(value)
+                    twid.setItem(row, col, item)
+
+            twid.setWindowTitle('Simple')
+            twid.resize(800, 600)
+            twid.show()
+
+    worker = MyWorkerThread()
+    worker.start()
+    worker.wait()
+    print(data)
+    print(worker.isFinished())
+    print("finished: " + sys._getframe().f_code.co_name)
     return []
 
 
@@ -92,12 +115,6 @@ def main():
 
     cell_data = choose_protein_data(protein)
     #print(cell_data)
-
-    _MAIN_WINDOW = PySide.QtGui.QWidget()
-    _MAIN_WINDOW.setWindowTitle('Luciferase')
-    _MAIN_WINDOW.resize(800, 600)
-    _MAIN_WINDOW.show()
-    sys.exit(app.exec_())
 
 
 
