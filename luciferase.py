@@ -23,7 +23,7 @@ def handle_xls(file_path:str) -> numpy.matrix :
     assert ret.shape == (8, 12)
     return ret
 
-def _standart_curve(a:float=10, b:float=100):
+def _standart_curve(a:float=1, b:float=0):
     return lambda x : a * x + b
 
 def funm(dat:numpy.matrix, f) -> numpy.matrix:
@@ -37,7 +37,9 @@ def funm(dat:numpy.matrix, f) -> numpy.matrix:
 
 def absorb_to_protein(absorb:numpy.matrix) -> numpy.matrix:
     f = _standart_curve()
-    ret = funm(absorb, f)
+    #FIXME: 调试中先不调用
+    #ret = funm(absorb, f)
+    ret = absorb.copy()
     return ret
 
 def get_cell_name() -> str:
@@ -45,6 +47,45 @@ def get_cell_name() -> str:
     dialog = PySide.QtGui.QInputDialog()
     return dialog.getText(dialog, "", "Cell name: ")[0]
 
+def get_chosen_range(grid:numpy.matrix, app:PySide.QtGui.QApplication) -> list:
+# http://segmentfault.com/q/1010000003028975
+    size = grid.shape
+    twid = PySide.QtGui.QTableWidget(size[0], size[1])
+# 为了设置宽度方便
+    for col in range(size[1]):
+        twid.setColumnWidth(col, 80)
+        for row in range(size[0]):
+            value = grid.item(row, col)
+            item = PySide.QtGui.QTableWidgetItem(str(value))
+            twid.setItem(row, col, item)
+    twid.resize(1020, 400)
+    twid.setEditTriggers(PySide.QtGui.QAbstractItemView.NoEditTriggers)
+    twid.show()
+
+    chosen_cell = []
+    @PySide.QtCore.Slot(int, int)
+    def double_click_cell(row, col):
+        chosen_cell.append([row, col])
+        print(chosen_cell)
+        if len(chosen_cell) == 2:
+            app.closeAllWindows()
+    twid.cellDoubleClicked.connect(double_click_cell)
+    app.exec_()
+    return chosen_cell
+
+def get_chosen_cell(grid:numpy.matrix, points:list) -> list:
+    print(points)
+#FIXME: Only support one cell now
+    assert len(points) == 2
+    begin = points[0]
+    end = points[1]
+    ret = []
+    for row in range(begin[0], end[0]):
+        ret += grid[row].flat
+#FIXME: 假定至少有一排
+    for col in range(0, end[1]):
+        ret.append(grid.item(end[0], col))
+    return ret
 
 def main():
 # Create a Qt application
@@ -68,7 +109,8 @@ def main():
             directory=os.path.expanduser("~/文档/第十期大创(2014)"),
             filter_str="Excel files (*.xls)")
     '''
-    path = "/home/lizhenbo/文档/第十期大创(2014)/20150708 H1299 NIH3T3.xls"
+    #path = "/home/lizhenbo/文档/第十期大创(2014)/20150708 H1299 NIH3T3.xls"
+    path = "/home/lizhenbo/sample.xls"
     absorb = handle_xls(path)
 
     protein = absorb_to_protein(absorb)
@@ -76,26 +118,11 @@ def main():
     #cell = get_cell_name()
     cell = "H1299"
 
-# FIXME: 把获取蛋白质信息的内容移出主函数
-# http://segmentfault.com/q/1010000003028975
-    #cell_data = choose_protein_data(protein)
-    grid = protein
-    size = grid.shape
-    twid = PySide.QtGui.QTableWidget(size[0], size[1])
-# 为了设置宽度方便
-    for col in range(size[1]):
-        twid.setColumnWidth(col, 80)
-        for row in range(size[0]):
-            value = grid.item(row, col)
-            print(value)
-            item = PySide.QtGui.QTableWidgetItem(str(value))
-            twid.setItem(row, col, item)
-    twid.resize(1020, 400)
-    twid.setEditTriggers(PySide.QtGui.QAbstractItemView.NoEditTriggers)
-    twid.show()
+    chosen_protein = get_chosen_cell(protein,
+            get_chosen_range(protein, app))
+    print(chosen_protein)
 
 
-    sys.exit(app.exec_())
 
 
 if __name__ == '__main__':
