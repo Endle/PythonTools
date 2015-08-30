@@ -23,6 +23,15 @@ def handle_xls(file_path:str) -> numpy.matrix :
     assert ret.shape == (8, 12)
     return ret
 
+def handle_xlsx(file_path:str, cell_name:str) -> numpy.matrix :
+    import openpyxl
+    book = openpyxl.load_workbook(file_path)
+    sheet = book.get_sheet_by_name(cell_name)
+    assert len(sheet.columns) <= 2
+
+    data = [cell.value for cell in sheet.columns[-1]]
+    return data
+
 def _standart_curve(a:float=1, b:float=0):
     return lambda x : a * x + b
 
@@ -91,20 +100,6 @@ def main():
 # Create a Qt application
     app = PySide.QtGui.QApplication(sys.argv)
     '''
-    path = basic_tools.getOpenFileName(title="选择萤光强度文件",
-            directory=os.path.expanduser("~/文档/第十期大创(2014)"),
-            filter_str="Excel files (*.xls *.xlsx)")
-    print(path)
-
-    if(path[-5:] == ".xlsx"):
-        print("Not support yet")
-        sys.exit()
-
-    handle_xls(path)
-
-    sys.exit()
-    '''
-    '''
     path = basic_tools.getOpenFileName(title="选择吸光度文件",
             directory=os.path.expanduser("~/文档/第十期大创(2014)"),
             filter_str="Excel files (*.xls)")
@@ -119,9 +114,25 @@ def main():
     cell = "H1299"
 
     chosen_protein = get_chosen_cell(protein,
-            get_chosen_range(protein, app))
+            [[0, 0], [4, 8]])
+            #get_chosen_range(protein, app))
     print(chosen_protein)
 
+    '''
+    path = basic_tools.getOpenFileName(title="选择萤光强度文件",
+            directory=os.path.expanduser("~/文档/第十期大创(2014)"),
+            filter_str="Excel files (*.xls *.xlsx)")
+    print(path)
+    '''
+    path = "/home/lizhenbo/文档/第十期大创(2014)/20150708(sirius) H1299 NIH3T3.xlsx"
+
+    if(path[-5:] != ".xlsx"):
+        print("Not support yet")
+        sys.exit()
+
+    handle_xlsx(path, cell)
+
+    sys.exit()
 
 
 
