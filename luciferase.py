@@ -27,9 +27,21 @@ def handle_xlsx(file_path:str, cell_name:str) -> numpy.matrix :
     import openpyxl
     book = openpyxl.load_workbook(file_path)
     sheet = book.get_sheet_by_name(cell_name)
-    assert len(sheet.columns) <= 2
+    cols = len(sheet.columns)
+    if cols == 1:
+        col = 0
+    elif cols == 2:
+        col = 1
+    else:
+        #FIXME: 给更多的提示
+        #import PySide.QtGui
+        #dialog = PySide.QtGui.QInputDialog()
+        #text = dialog.getText(dialog, "", "Choose right column: ")[0]
+        #col = int(text)
+        col = 0
 
-    data = [cell.value for cell in sheet.columns[-1]]
+    data = [cell.value for cell in sheet.columns[col]]
+    print(data)
     return data
 
 def _standart_curve(a:float=1, b:float=0):
@@ -92,45 +104,40 @@ def get_chosen_cell(grid:numpy.matrix, points:list) -> list:
     for row in range(begin[0], end[0]):
         ret += grid[row].flat
 #FIXME: 假定至少有一排
-    for col in range(0, end[1]):
+    for col in range(0, end[1] + 1):
         ret.append(grid.item(end[0], col))
     return ret
 
 def main():
 # Create a Qt application
     app = PySide.QtGui.QApplication(sys.argv)
-    '''
-    path = basic_tools.getOpenFileName(title="选择吸光度文件",
-            directory=os.path.expanduser("~/文档/第十期大创(2014)"),
-            filter_str="Excel files (*.xls)")
-    '''
-    #path = "/home/lizhenbo/文档/第十期大创(2014)/20150708 H1299 NIH3T3.xls"
-    path = "/home/lizhenbo/sample.xls"
+    #path = basic_tools.getOpenFileName(title="选择吸光度文件",
+            #directory=os.path.expanduser("~/文档/第十期大创(2014)"),
+            #filter_str="Excel files (*.xls)")
+    path = "/home/lizhenbo/文档/第十期大创(2014)/15.07.25 CHO C518/20150725 CHO C518 protein.xls"
     absorb = handle_xls(path)
-
     protein = absorb_to_protein(absorb)
 
     #cell = get_cell_name()
-    cell = "H1299"
+    cell = "CHO"
 
     chosen_protein = get_chosen_cell(protein,
-            [[0, 0], [4, 8]])
+            [[0, 0], [1, 5]])
             #get_chosen_range(protein, app))
     print(chosen_protein)
 
-    '''
-    path = basic_tools.getOpenFileName(title="选择萤光强度文件",
-            directory=os.path.expanduser("~/文档/第十期大创(2014)"),
-            filter_str="Excel files (*.xls *.xlsx)")
-    print(path)
-    '''
-    path = "/home/lizhenbo/文档/第十期大创(2014)/20150708(sirius) H1299 NIH3T3.xlsx"
+    #path = basic_tools.getOpenFileName(title="选择萤光强度文件",
+            #directory=os.path.expanduser("~/文档/第十期大创(2014)"),
+            #filter_str="Excel files (*.xlsx)")
+    path = "/home/lizhenbo/文档/第十期大创(2014)/15.07.25 CHO C518/20150725 CHO C518.xlsx"
 
     if(path[-5:] != ".xlsx"):
         print("Not support yet")
         sys.exit()
 
-    handle_xlsx(path, cell)
+    chosen_fluorescence = handle_xlsx(path, cell)
+
+    assert len(chosen_protein) == len(chosen_fluorescence)
 
     sys.exit()
 
