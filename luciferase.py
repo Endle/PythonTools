@@ -108,6 +108,18 @@ def get_chosen_cell(grid:numpy.matrix, points:list) -> list:
         ret.append(grid.item(end[0], col))
     return ret
 
+class ValueType(object):
+    '''相比于用 namedtuple 实现的 ValueGroup，还是使用 class 更方便
+    '''
+    __slots__ = ("average", "minimum", "maximum")
+    def __init__(self, l):
+        self.minimum = min(l)
+        self.maximum = max(l)
+        self.average = sum(l) / len(l)
+    def __repr__(self):
+        return 'average %f, data range (%f, %f)' % (self.average, self.minimum, self.maximum)
+
+
 def main():
 # Create a Qt application
     app = PySide.QtGui.QApplication(sys.argv)
@@ -124,7 +136,6 @@ def main():
     chosen_protein = get_chosen_cell(protein,
             [[0, 0], [1, 5]])
             #get_chosen_range(protein, app))
-    print(chosen_protein)
 
     #path = basic_tools.getOpenFileName(title="选择萤光强度文件",
             #directory=os.path.expanduser("~/文档/第十期大创(2014)"),
@@ -138,6 +149,14 @@ def main():
     chosen_fluorescence = handle_xlsx(path, cell)
 
     assert len(chosen_protein) == len(chosen_fluorescence)
+    ratio_list = [chosen_fluorescence[i] / chosen_protein[i] for i in range(len(chosen_protein))]
+    print(ratio_list)
+
+    import more_itertools
+    assert len(ratio_list) % 3 == 0
+    ratio_chunk = more_itertools.chunked(ratio_list, 3)
+    result_list = [ValueType(chunk)  for chunk in ratio_chunk]
+    print(result_list)
 
     sys.exit()
 
