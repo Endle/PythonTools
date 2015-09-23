@@ -111,18 +111,21 @@ def get_chosen_cell(grid:numpy.matrix, points:list) -> list:
 class ValueType(object):
     '''相比于用 namedtuple 实现的 ValueGroup，还是使用 class 更方便
     '''
-    __slots__ = ("average", "minimum", "maximum")
+    __slots__ = ("name", "average", "minimum", "maximum")
     def __init__(self, l):
         self.minimum = min(l)
         self.maximum = max(l)
         self.average = sum(l) / len(l)
     def __repr__(self):
-        return 'average %f, data range (%f, %f)' % (self.average, self.minimum, self.maximum)
+        return '%s: average %f, data range (%f, %f)' % (self.name, self.average, self.minimum, self.maximum)
 
 
 def main():
 # Create a Qt application
     app = PySide.QtGui.QApplication(sys.argv)
+
+    cell_count = 3 # FIXME: Hard-coded
+
     #path = basic_tools.getOpenFileName(title="选择吸光度文件",
             #directory=os.path.expanduser("~/文档/第十期大创(2014)"),
             #filter_str="Excel files (*.xls)")
@@ -156,7 +159,35 @@ def main():
     assert len(ratio_list) % 3 == 0
     ratio_chunk = more_itertools.chunked(ratio_list, 3)
     result_list = [ValueType(chunk)  for chunk in ratio_chunk]
+    #print(result_list)
+
+    fin_ingredient = open("ingredient.txt")
+    ingredient = [s.strip() for s in fin_ingredient.readlines()]
+    #print(ingredient)
+    fin_ingredient.close()
+
+    if len(result_list) != len(ingredient):
+        print("长度不匹配，自动截断")
+        assert len(result_list) > len(ingredient)
+        assert (len(result_list) - len(ingredient)) % 3 == 0
+        result_list = result_list[:len(ingredient)]
+    else:
+        print("长度相同，自动匹配")
+
+    for i in range(len(result_list)):
+        result_list[i].name = ingredient[i]
+
     print(result_list)
+
+    print("开始打印图象了")
+    import matplotlib.pyplot as plt
+
+
+    plt.xlabel("Cells")
+    plt.ylabel("Relative fluorescence")
+
+    plt.savefig("cancer.svg", format="svg")
+    plt.show()
 
     sys.exit()
 

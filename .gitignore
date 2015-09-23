@@ -1,5 +1,6 @@
 *.swp
 *.txt
 *.csv
+*.svg
 __*.py
 __pycache__
