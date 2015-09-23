@@ -124,67 +124,99 @@ def main():
 # Create a Qt application
     app = PySide.QtGui.QApplication(sys.argv)
 
-    cell_count = 3 # FIXME: Hard-coded
+    cell_count = 1 # FIXME: Hard-coded
 
-    #path = basic_tools.getOpenFileName(title="选择吸光度文件",
-            #directory=os.path.expanduser("~/文档/第十期大创(2014)"),
-            #filter_str="Excel files (*.xls)")
-    path = "/home/lizhenbo/文档/第十期大创(2014)/15.07.25 CHO C518/20150725 CHO C518 protein.xls"
-    absorb = handle_xls(path)
-    protein = absorb_to_protein(absorb)
+    def get_cell_value():
+        '''得到该细胞的 ValueGroup
+        '''
+        #path = basic_tools.getOpenFileName(title="选择吸光度文件",
+                #directory=os.path.expanduser("~/文档/第十期大创(2014)"),
+                #filter_str="Excel files (*.xls)")
+        path = "/home/lizhenbo/文档/第十期大创(2014)/15.07.25 CHO C518/20150725 CHO C518 protein.xls"
+        absorb = handle_xls(path)
+        protein = absorb_to_protein(absorb)
 
-    #cell = get_cell_name()
-    cell = "CHO"
+        #cell = get_cell_name()
+        cell = "CHO"
 
-    chosen_protein = get_chosen_cell(protein,
-            [[0, 0], [1, 5]])
-            #get_chosen_range(protein, app))
+        chosen_protein = get_chosen_cell(protein,
+                [[0, 0], [1, 5]])
+                #get_chosen_range(protein, app))
 
-    #path = basic_tools.getOpenFileName(title="选择萤光强度文件",
-            #directory=os.path.expanduser("~/文档/第十期大创(2014)"),
-            #filter_str="Excel files (*.xlsx)")
-    path = "/home/lizhenbo/文档/第十期大创(2014)/15.07.25 CHO C518/20150725 CHO C518.xlsx"
+        #path = basic_tools.getOpenFileName(title="选择萤光强度文件",
+                #directory=os.path.expanduser("~/文档/第十期大创(2014)"),
+                #filter_str="Excel files (*.xlsx)")
+        path = "/home/lizhenbo/文档/第十期大创(2014)/15.07.25 CHO C518/20150725 CHO C518.xlsx"
 
-    if(path[-5:] != ".xlsx"):
-        print("Not support yet")
-        sys.exit()
+        if(path[-5:] != ".xlsx"):
+            print("Not support yet")
+            sys.exit()
 
-    chosen_fluorescence = handle_xlsx(path, cell)
+        chosen_fluorescence = handle_xlsx(path, cell)
 
-    assert len(chosen_protein) == len(chosen_fluorescence)
-    ratio_list = [chosen_fluorescence[i] / chosen_protein[i] for i in range(len(chosen_protein))]
-    print(ratio_list)
+        assert len(chosen_protein) == len(chosen_fluorescence)
+        ratio_list = [chosen_fluorescence[i] / chosen_protein[i] for i in range(len(chosen_protein))]
+        print(ratio_list)
 
-    import more_itertools
-    assert len(ratio_list) % 3 == 0
-    ratio_chunk = more_itertools.chunked(ratio_list, 3)
-    result_list = [ValueType(chunk)  for chunk in ratio_chunk]
-    #print(result_list)
+        import more_itertools
+        assert len(ratio_list) % 3 == 0
+        ratio_chunk = more_itertools.chunked(ratio_list, 3)
+        result_list = [ValueType(chunk)  for chunk in ratio_chunk]
+        #print(result_list)
 
-    fin_ingredient = open("ingredient.txt")
-    ingredient = [s.strip() for s in fin_ingredient.readlines()]
-    #print(ingredient)
-    fin_ingredient.close()
+        fin_ingredient = open("ingredient.txt")
+        ingredient = [s.strip() for s in fin_ingredient.readlines()]
+        #print(ingredient)
+        fin_ingredient.close()
 
-    if len(result_list) != len(ingredient):
-        print("长度不匹配，自动截断")
-        assert len(result_list) > len(ingredient)
-        assert (len(result_list) - len(ingredient)) % 3 == 0
-        result_list = result_list[:len(ingredient)]
-    else:
-        print("长度相同，自动匹配")
+        if len(result_list) != len(ingredient):
+            print("长度不匹配，自动截断")
+            assert len(result_list) > len(ingredient)
+            assert (len(result_list) - len(ingredient)) % 3 == 0
+            result_list = result_list[:len(ingredient)]
+        else:
+            print("长度相同，自动匹配")
 
-    for i in range(len(result_list)):
-        result_list[i].name = ingredient[i]
+        for i in range(len(result_list)):
+            result_list[i].name = ingredient[i]
 
-    print(result_list)
+        print(result_list)
+        return result_list
 
     print("开始打印图象了")
     import matplotlib.pyplot as plt
+    import numpy
 
+    data_list = []
+    cell_name = ["CHO"]
+    for i in range(cell_count):
+        data_list.append(get_cell_value())
+
+    print(cell_count)
+    ingredient_count = len(data_list[0])
+    print(ingredient_count)
+    index = numpy.arange(cell_count) # 对应的是横坐标的起点
+    bar_width = 0.35
+
+    def get_rect(ing):
+        means = []
+        for ic in range(cell_count): # 把每个细胞的信息抓取出来
+            print(data_list[ic][ing])
+            means.append(data_list[ic][ing].average)
+        print(means)
+        rect = plt.bar(index + ing * bar_width, means, bar_width, label=data_list[0][ing].name)
+        return rect
+
+    rect_list = [get_rect(i) for i in range(ingredient_count)]
 
     plt.xlabel("Cells")
     plt.ylabel("Relative fluorescence")
+
+    #print(cell_name)
+    plt.xticks(index + bar_width, cell_name)
+    plt.legend()
+
+    plt.tight_layout()
 
     plt.savefig("cancer.svg", format="svg")
     plt.show()
