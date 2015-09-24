@@ -41,6 +41,7 @@ def handle_xlsx(file_path:str, cell_name:str) -> numpy.matrix :
         col = 0
 
     data = [cell.value for cell in sheet.columns[col]]
+    data = [v for v in data if v != None] # 过滤无效值
     print(data)
     return data
 
@@ -106,6 +107,11 @@ def get_chosen_cell(grid:numpy.matrix, points:list) -> list:
 #FIXME: 假定至少有一排
     for col in range(0, end[1] + 1):
         ret.append(grid.item(end[0], col))
+
+#过滤掉 None
+    ret = [s for s in ret if s != None]
+    print("After check")
+    print(ret)
     return ret
 
 class ValueType(object):
@@ -124,35 +130,33 @@ def main():
 # Create a Qt application
     app = PySide.QtGui.QApplication(sys.argv)
 
-    cell_count = 1 # FIXME: Hard-coded
+    cell_count = 3 # FIXME: Hard-coded
 
     def get_cell_value():
         '''得到该细胞的 ValueGroup
         '''
-        #path = basic_tools.getOpenFileName(title="选择吸光度文件",
-                #directory=os.path.expanduser("~/文档/第十期大创(2014)"),
-                #filter_str="Excel files (*.xls)")
-        path = "/home/lizhenbo/文档/第十期大创(2014)/15.07.25 CHO C518/20150725 CHO C518 protein.xls"
+        path = basic_tools.getOpenFileName(title="选择吸光度文件",
+                directory=os.path.expanduser("~/文档/第十期大创(2014)"),
+                filter_str="Excel files (*.xls)")
         absorb = handle_xls(path)
         protein = absorb_to_protein(absorb)
 
-        #cell = get_cell_name()
-        cell = "CHO"
+        cell = get_cell_name()
 
         chosen_protein = get_chosen_cell(protein,
-                [[0, 0], [1, 5]])
-                #get_chosen_range(protein, app))
+                get_chosen_range(protein, app))
+        print("Protein len: " + str(len(chosen_protein)))
 
-        #path = basic_tools.getOpenFileName(title="选择萤光强度文件",
-                #directory=os.path.expanduser("~/文档/第十期大创(2014)"),
-                #filter_str="Excel files (*.xlsx)")
-        path = "/home/lizhenbo/文档/第十期大创(2014)/15.07.25 CHO C518/20150725 CHO C518.xlsx"
+        path = basic_tools.getOpenFileName(title="选择萤光强度文件",
+                directory=os.path.expanduser("~/文档/第十期大创(2014)"),
+                filter_str="Excel files (*.xlsx)")
 
         if(path[-5:] != ".xlsx"):
             print("Not support yet")
             sys.exit()
 
         chosen_fluorescence = handle_xlsx(path, cell)
+        print("Flu len: " + str(len(chosen_fluorescence)))
 
         assert len(chosen_protein) == len(chosen_fluorescence)
         ratio_list = [chosen_fluorescence[i] / chosen_protein[i] for i in range(len(chosen_protein))]
@@ -181,22 +185,24 @@ def main():
             result_list[i].name = ingredient[i]
 
         print(result_list)
-        return result_list
+        return (result_list, cell)
+
+    data_list = []
+    cell_name = []
+    for i in range(cell_count):
+        v,c = get_cell_value()
+        data_list.append(v)
+        cell_name.append(c)
 
     print("开始打印图象了")
     import matplotlib.pyplot as plt
     import numpy
 
-    data_list = []
-    cell_name = ["CHO"]
-    for i in range(cell_count):
-        data_list.append(get_cell_value())
-
-    print(cell_count)
     ingredient_count = len(data_list[0])
-    print(ingredient_count)
-    index = numpy.arange(cell_count) # 对应的是横坐标的起点
-    bar_width = 0.35
+    bar_width = 0.1
+    group_width = 0.8
+    index = numpy.linspace(0, cell_count*group_width, cell_count)
+    color_list = ["r", "sandybrown", "blue", "chartreuse", "skyblue", "purple"]
 
     def get_rect(ing):
         means = []
@@ -204,7 +210,9 @@ def main():
             print(data_list[ic][ing])
             means.append(data_list[ic][ing].average)
         print(means)
-        rect = plt.bar(index + ing * bar_width, means, bar_width, label=data_list[0][ing].name)
+        rect = plt.bar(index + ing * bar_width, means, bar_width,
+                color = color_list[ing],
+                label=data_list[0][ing].name)
         return rect
 
     rect_list = [get_rect(i) for i in range(ingredient_count)]
@@ -212,11 +220,11 @@ def main():
     plt.xlabel("Cells")
     plt.ylabel("Relative fluorescence")
 
-    #print(cell_name)
-    plt.xticks(index + bar_width, cell_name)
+    print(cell_name)
+    plt.xticks(index + bar_width*3, cell_name)
     plt.legend()
 
-    plt.tight_layout()
+    #plt.tight_layout()
 
     plt.savefig("cancer.svg", format="svg")
     plt.show()
