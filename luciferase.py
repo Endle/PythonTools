@@ -125,7 +125,6 @@ class ValueType(object):
     def __repr__(self):
         return '%s: average %f, data range (%f, %f)' % (self.name, self.average, self.minimum, self.maximum)
 
-
 def main():
 # Create a Qt application
     app = PySide.QtGui.QApplication(sys.argv)
@@ -204,14 +203,32 @@ def main():
     index = numpy.linspace(0, cell_count*group_width, cell_count)
     color_list = ["r", "sandybrown", "blue", "chartreuse", "skyblue", "purple"]
 
+    #for i in data_list:
+        #lipo2000 = i[1]
+        #for v in i:
+            #v.average /= lipo2000.average
+            #v.maximum /= lipo2000.average
+            #v.minimum /= lipo2000.average
+        #print(i)
+
     def get_rect(ing):
         means = []
+        maximum = []
+        minimum = []
+        error_bar = []
         for ic in range(cell_count): # 把每个细胞的信息抓取出来
             print(data_list[ic][ing])
             means.append(data_list[ic][ing].average)
+            maximum.append(data_list[ic][ing].maximum)
+            minimum.append(data_list[ic][ing].minimum)
         print(means)
+        print(maximum)
+        print(minimum)
+        means = numpy.array(means)
+        ytop = numpy.array(maximum) - means
+        ybottom = means - numpy.array(minimum)
         rect = plt.bar(index + ing * bar_width, means, bar_width,
-                color = color_list[ing],
+                color = color_list[ing], yerr=(ybottom, ytop),
                 label=data_list[0][ing].name)
         return rect
 
@@ -222,11 +239,11 @@ def main():
 
     print(cell_name)
     plt.xticks(index + bar_width*3, cell_name)
-    plt.legend()
+    #plt.legend(loc='center right',bbox_to_anchor=(1, 0.5))
 
     #plt.tight_layout()
 
-    plt.savefig("cancer.svg", format="svg")
+    plt.savefig("figure.svg", format="svg")
     plt.show()
 
     sys.exit()
