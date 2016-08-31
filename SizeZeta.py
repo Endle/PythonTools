@@ -1,5 +1,38 @@
 #!/usr/bin/env python3
 import basic_tools
+from collections import namedtuple
 
 # 生成一个条形图，左侧为 Size，右侧为 Zeta
+# 仅画图，不进行任何额外的处理
+
+# See http://matplotlib.org/examples/api/barchart_demo.html
+
+class SampleData(basic_tools.FrozenClass):
+    def __init__(self):
+        self.__init_slots__(["SampleName", "Size", "Zeta"])
+
+
+def load_data(fp=basic_tools.HOME_PATH+"sample_data.xlsx") -> list:
+    '''读取一个 xlsx 文件    '''
+    import openpyxl
+
+    from openpyxl import load_workbook
+    wb = load_workbook(filename=fp, read_only=True)
+    ws = wb[ wb.sheetnames[0] ]
+    ret = []
+    for r in tuple(ws.rows)[1:]:
+        d = SampleData()
+        d.SampleName = r[0].value
+        d.Size       = r[1].value
+        d.Zeta       = r[2].value
+        ret.append(d)
+    return ret
+
+def main():
+    data = load_data()
+
+if __name__ == '__main__':
+    main()
+else:
+    raise Exception("SizeZeta.py shouldn't be used by other component")
 
