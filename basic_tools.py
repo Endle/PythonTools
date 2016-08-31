@@ -43,6 +43,21 @@ def longest_common_prefix(strings):
 def get_range(li):
     return (min(li), max(li))
 
+# http://stackoverflow.com/a/39243708/1166518
+class FrozenClass(object):
+    __isfrozen = False
+    def _freeze(self):
+        self.__isfrozen = True
+    def __init_slots__(self, slots):
+        for key in slots:
+            object.__setattr__(self, key, None)
+        self._freeze()
+    def __setattr__(self, key, value):
+        if self.__isfrozen and not hasattr(self, key):
+            raise TypeError( "%r is a frozen class" % self )
+        object.__setattr__(self, key, value)
+
+
 import os
 HOME_PATH = os.path.expanduser('~/')
 def getOpenFileName(title:str="Open File", directory:str=HOME_PATH, filter_str:str="", parent=None):
