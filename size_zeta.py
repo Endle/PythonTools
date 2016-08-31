@@ -3,6 +3,9 @@ import basic_tools
 from collections import namedtuple
 from momap import momap
 
+# 这个文件包含了从 Excel 文档里将不同的实验分组的内容，
+# 以及生成对应的 ErrorBar
+
 # ValueGroup 对应一个样品测量三次后得到的数值
 ValueGroup = namedtuple("ValueGroup", ["average", "data_range"])
 # SingleSample 对应一个样品测量三次后得到的结论
