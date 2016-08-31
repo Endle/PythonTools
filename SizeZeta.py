@@ -6,6 +6,7 @@ from collections import namedtuple
 # 仅画图，不进行任何额外的处理
 
 # See http://matplotlib.org/examples/api/barchart_demo.html
+#     http://matplotlib.org/examples/api/two_scales.html
 
 class SampleData(basic_tools.FrozenClass):
     def __init__(self):
@@ -28,8 +29,40 @@ def load_data(fp=basic_tools.HOME_PATH+"sample_data.xlsx") -> list:
         ret.append(d)
     return ret
 
+def draw_barchart(data):
+    N = len(data)
+    name = tuple(i.SampleName for i in data)
+    size = tuple(i.Size for i in data)
+    zeta = tuple(i.Zeta for i in data)
+
+    import numpy as np
+    import matplotlib.pyplot as plt
+
+    fig, ax1 = plt.subplots()
+    ind = np.arange(N)
+    bar_width = 0.35
+
+    rect1 = ax1.bar(ind, size, bar_width,
+            color='w', hatch='/', label="Size")
+    ax1.set_ylabel("Size(nm)")
+    ax1.set_xticks(ind+bar_width)
+    ax1.set_xticklabels(name)
+
+    ax2 = ax1.twinx()
+    rect2 = ax2.bar(ind+bar_width, zeta,
+            bar_width, color='w', hatch='.', label="Zeta")
+    ax2.set_ylabel("Zeta(mV)")
+    ax2.axhline(0, color='black')
+
+    import matplotlib.patches as mpatches
+    ax1_patch = mpatches.Patch(facecolor='w', edgecolor='black', hatch='/', label="Size")
+    ax2_patch = mpatches.Patch(facecolor='w', edgecolor='black', hatch='.', label="Zeta")
+    plt.legend(handles=[ax1_patch, ax2_patch])
+    plt.show()
+
 def main():
     data = load_data()
+    draw_barchart(data)
 
 if __name__ == '__main__':
     main()
