@@ -42,22 +42,26 @@ def draw_barchart(data):
     ind = np.arange(N)
     bar_width = 0.35
 
-    rect1 = ax1.bar(ind, size, bar_width,
+    rect1 = ax1.bar(ind-bar_width*0.5, size, bar_width,
             color='w', hatch='/', label="Size")
     ax1.set_ylabel("Size(nm)")
-    ax1.set_xticks(ind+bar_width)
+    ax1.set_xticks(ind)
     ax1.set_xticklabels(name)
 
     ax2 = ax1.twinx()
-    rect2 = ax2.bar(ind+bar_width, zeta,
-            bar_width, color='w', hatch='.', label="Zeta")
+    #rect2 = ax2.bar(ind+bar_width, zeta,
+            #bar_width, color='w', hatch='.', label="Zeta")
+    line2 = ax2.plot(ind, zeta, color='black')
     ax2.set_ylabel("Zeta(mV)")
     ax2.axhline(0, color='black')
 
     import matplotlib.patches as mpatches
+    import matplotlib.lines   as mlines
     ax1_patch = mpatches.Patch(facecolor='w', edgecolor='black', hatch='/', label="Size")
-    ax2_patch = mpatches.Patch(facecolor='w', edgecolor='black', hatch='.', label="Zeta")
-    plt.legend(handles=[ax1_patch, ax2_patch])
+    ax2_line = mlines.Line2D([], [], color='black', label='Zeta')
+    #plt.legend(handles=[ax1_patch, ax2_patch])
+    plt.legend(handles=[ax1_patch, ax2_line])
+    #plt.legend([rect1, line2])
     plt.show()
 
 def main():
